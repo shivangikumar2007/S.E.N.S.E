@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S.E.N.S.E. - Authentication</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; background: #0b0e14; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .login-card { background: #1a202c; padding: 40px; border-radius: 12px; border: 1px solid #2d3748; width: 320px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+    h2 { color: #00f2fe; text-align: center; margin-top: 0; }
+    p { color: #a0aec0; font-size: 13px; text-align: center; }
+    label { display: block; margin-top: 15px; font-size: 14px; color: #cbd5e0; }
+    input, select { width: 100%; padding: 10px; margin-top: 5px; background: #2d3748; border: 1px solid #4a5568; color: #fff; border-radius: 6px; box-sizing: border-box; }
+    button { width: 100%; padding: 12px; margin-top: 20px; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); border: none; color: #000; font-weight: bold; border-radius: 6px; cursor: pointer; }
+    button:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <h2>S.E.N.S.E. Login</h2>
+    <p>Team ThinkSync | UDGAM Hackathon</p>
+    
+    <label>Username</label>
+    <input type="text" id="username" value="admin">
+
+    <label>Password</label>
+    <input type="password" id="password" value="password123">
+
+    <label>Select Role</label>
+    <select id="role">
+      <option value="Community Manager">Community Manager</option>
+      <option value="Homeowner">Homeowner</option>
+    </select>
+
+    <button onclick="login()">Enter System</button>
+  </div>
+
+  <script>
+    async function login() {
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password, role })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        localStorage.setItem('sense_token', data.token);
+        localStorage.setItem('sense_role', data.role);
+        window.location.href = '/index.html';
+      } else {
+        alert('Login Failed: ' + data.error);
+      }
+    }
+  </script>
+</body>
+</html>
