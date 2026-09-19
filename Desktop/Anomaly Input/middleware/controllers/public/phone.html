@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S.E.N.S.E. Mobile Client</title>
+  <style>
+    body { font-family: sans-serif; background: #111; color: white; padding: 20px; margin: 0; }
+    h2 { color: #00f2fe; text-align: center; }
+    .card { background: #1a202c; padding: 20px; border-radius: 12px; border: 1px solid #2d3748; }
+    label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; }
+    input { width: 100%; padding: 12px; font-size: 18px; margin-top: 5px; border-radius: 8px; border: none; background: #2d3748; color: white; box-sizing: border-box; }
+    button { width: 100%; padding: 15px; font-size: 18px; margin-top: 25px; background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #000; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; }
+    #status { margin-top: 20px; text-align: center; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <h2>📱 Mobile Sensor Node</h2>
+  <div class="card">
+    <label>Power Reading (kWh):</label>
+    <input type="number" id="pInput" value="350">
+
+    <label>Water Flow (L/min):</label>
+    <input type="number" id="wInput" value="15">
+
+    <label>Air Quality Index (AQI):</label>
+    <input type="number" id="aInput" value="85">
+
+    <button onclick="sendTelemetry()">Transmit To Dashboard</button>
+  </div>
+
+  <div id="status"></div>
+
+  <script>
+    async function sendTelemetry() {
+      const payload = {
+        power: document.getElementById('pInput').value,
+        water: document.getElementById('wInput').value,
+        air: document.getElementById('aInput').value
+      };
+
+      const status = document.getElementById('status');
+      status.innerText = "Transmitting telemetry...";
+
+      try {
+        const res = await fetch('/api/sensor-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          status.innerText = "✅ Telemetry Transmitted!";
+          status.style.color = "#00ff88";
+        }
+      } catch (err) {
+        status.innerText = "❌ Transmission Error";
+        status.style.color = "#ff4444";
+      }
+    }
+  </script>
+</body>
+</html>

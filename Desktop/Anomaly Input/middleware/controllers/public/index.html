@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>S.E.N.S.E. - Smart Resource Dashboard</title>
+  <style>
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0b0e14; color: #fff; margin: 0; padding: 20px; }
+    header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid #2d3748; }
+    h1 { color: #00f2fe; margin: 0; }
+    .badge { color: #a0aec0; font-size: 14px; margin-top: 5px; }
+    .grid { display: flex; gap: 20px; margin-top: 25px; flex-wrap: wrap; }
+    .card { background: #1a202c; border: 1px solid #2d3748; padding: 20px; border-radius: 12px; flex: 1; min-width: 240px; }
+    .metric { font-size: 38px; font-weight: bold; color: #4fd1c5; margin-top: 10px; }
+    .alert-container { margin-top: 30px; }
+    .alert-card { background: #742a2a; border-left: 5px solid #e53e3e; padding: 15px; border-radius: 6px; margin-bottom: 10px; }
+    .normal-card { background: #1c4532; border-left: 5px solid #38a169; padding: 15px; border-radius: 6px; }
+    input { width: 80px; padding: 6px; background: #2d3748; border: 1px solid #4a5568; color: #fff; border-radius: 4px; }
+    button { background: #3182ce; color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #2b6cb0; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>S.E.N.S.E. - Smart Resource Dashboard</h1>
+    <div class="badge">Team ThinkSync | Role: <span id="userRole">Manager</span></div>
+  </header>
+
+  <div class="grid">
+    <!-- Threshold Setting Panel -->
+    <div class="card">
+      <h3>⚙️ Threshold Controls</h3>
+      <p>Power Limit: <input type="number" id="thPower" value="300"> kWh</p>
+      <p>Water Limit: <input type="number" id="thWater" value="10"> L/min</p>
+      <p>Air Quality Limit: <input type="number" id="thAir" value="100"> AQI</p>
+      <button onclick="updateThresholds()">Save Thresholds</button>
+    </div>
+
+    <!-- Live Metrics -->
+    <div class="card">
+      <h3>⚡ Power Telemetry</h3>
+      <div class="metric" id="dispPower">0 kWh</div>
+      <small id="thPowerDisp" style="color:#a0aec0">Max Threshold: 300</small>
+    </div>
+
+    <div class="card">
+      <h3>💧 Water Flow</h3>
+      <div class="metric" id="dispWater">0 L/min</div>
+      <small id="thWaterDisp" style="color:#a0aec0">Max Threshold: 10</small>
+    </div>
+
+    <div class="card">
+      <h3>🌫️ Air Quality</h3>
+      <div class="metric" id="dispAir">0 AQI</div>
+      <small id="thAirDisp" style="color:#a0aec0">Max Threshold: 100</small>
+    </div>
+  </div>
+
+  <div class="alert-container">
+    <h2>🚨 Live Anomaly Feed</h2>
+    <div id="alerts">
+      <div class="normal-card">Waiting for phone telemetry input...</div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('userRole').innerText = localStorage.getItem('sense_role') || 'Community Manager';
+
+    const ws = new WebSocket(`ws://${window.location.host}`);
+
+    ws.onmessage = (event) => {
+      const msg = JSON.parse(event.data);
+
+      if (msg.type === 'THRESHOLDS_UPDATED') {
+        document.getElementById('thPower').value = msg.thresholds.power;
+        document.getElementById('thWater').value = msg.thresholds.water;
+        document.getElementById('thAir').value = msg.thresholds.air;
+
+        document.getElementById('thPowerDisp').innerText = `Max Threshold: ${msg.thresholds.power}`;
+        document.getElementById('thWaterDisp').innerText = `Max Threshold: ${msg.thresholds.water}`;
+        document.getElementById('thAirDisp').innerText = `Max Threshold: ${msg.thresholds.air}`;
+      }
+
+      if (msg.type === 'SENSOR_READING') {
+        document.getElementById('dispPower').innerText = msg.data.power + ' kWh';
+        document.getElementById('dispWater').innerText = msg.data.water + ' L/min';
+        document.getElementById('dispAir').innerText = msg.data.air + ' AQI';
+
+        const alertDiv = document.getElementById('alerts');
+        if (msg.alerts && msg.alerts.length > 0) {
+          alertDiv.innerHTML = msg.alerts.map(a => `<div class="alert-card">${a} <span style="font-size:12px; float:right;">[${msg.data.timestamp}]</span></div>`).join('');
+        } else {
+          alertDiv.innerHTML = `<div class="normal-card">✅ All sensor parameters within threshold limits. [${msg.data.timestamp}]</div>`;
+        }
+      }
+    };
+
+    function updateThresholds() {
+      fetch('/api/thresholds', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          power: document.getElementById('thPower').value,
+          water: document.getElementById('thWater').value,
+          air: document.getElementById('thAir').value
+        })
+      });
+    }
+  </script>
+</body>
+</html>
