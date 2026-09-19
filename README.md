@@ -56,12 +56,13 @@ text
 
 Federated learning loop
 
-text
+```text
 Building A edge  <-- encrypted model weights -->  +-------------+
 Building B edge  <-- encrypted model weights -->  |  Federated  |
 Building N edge  <-- encrypted model weights -->  | coordinator |
-                                                  +-------------+```
+                                                  +-------------+
                 (raw data never leaves the building)
+```
 
 Data flow
 
@@ -78,28 +79,28 @@ S.E.N.S.E uses role-based access control (RBAC) with three roles. Every view and
 
 1. Administrator
 
-- System-wide control.
-- Manage buildings: add and delete buildings.
-- Assign owners to buildings.
-- Handle global network / firewall requests.
-- Block and unblock users.
-- Monitor overall system and firewall status.
+  - System-wide control.
+  - Manage buildings: add and delete buildings.
+  - Assign owners to buildings.
+  - Handle global network / firewall requests.
+  - Block and unblock users.
+  - Monitor overall system and firewall status.
 
 2. Owner / Community Manager
 
-- Manages an assigned building only.
-- View the residents of their building.
-- Approve and manage localised network requests.
-- Onboard new residents / normal users.
-- Monitor their building's status.
+  - Manages an assigned building only.
+  - View the residents of their building.
+  - Approve and manage localised network requests.
+  - Onboard new residents / normal users.
+  - Monitor their building's status.
 
 3. User / Resident (including Guest Access)
 
-- Resident dashboard scoped to their own unit and building.
-- View live unit metrics.
-- Make network requests.
-- View the status of their requests (PENDING, approved, or rejected).
-- Guest access: an unregistered email can sign in as a guest for a chosen building, with limited features. Blocked users are denied access.
+  - Resident dashboard scoped to their own unit and building.
+  - View live unit metrics.
+  - Make network requests.
+  - View the status of their requests (PENDING, approved, or rejected).
+  - Guest access: an unregistered email can sign in as a guest for a chosen building, with limited features. Blocked users are denied access.
 
 Permission Matrix
 
@@ -121,21 +122,14 @@ Project Roadmap
 
 Phase 1 - Hackathon Prototype (Now)
 
-- Proof of concept with mock sensor data
-- Dashboard UI with live metrics and threshold alerts
-- Role-based access and network request workflow
+  - Proof of concept with mock sensor data
+  - Dashboard UI with live metrics and threshold alerts
+  - Role-based access and network request workflow
 
-Phase 2 - Next Phase
+Phase 2 - Future Vision
 
-- Full hardware integration
-- Expanded datasets
-- Cloud scaling
-- Enhanced DRL and federated learning models
-
-Phase 3 - Future Vision
-
-- Broader smart building portfolio adoption
-- AI-driven predictive resource management at scale
+  - Broader smart building portfolio adoption
+  - AI-driven predictive resource management at scale
 
 Team
 Built by Team ThinkSync 
