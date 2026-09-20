@@ -61,6 +61,16 @@ body {
   line-height: 1.5;
 }
 
+html,
+body,
+body *,
+button,
+input,
+select,
+textarea {
+  color: #000 !important;
+}
+
 /* Background mesh gradient decoration */
 .bg-mesh {
   position: fixed;
