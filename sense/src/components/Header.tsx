@@ -12,6 +12,7 @@ import {
   User,
   LogOut,
   Settings,
+  Database,
   CheckCircle2,
   AlertTriangle,
   X,
@@ -24,7 +25,6 @@ interface HeaderProps {
   session: UserSession;
   onLogout: () => void;
   activeAlertsCount: number;
-  openAnomalyModal: () => void;
   buildings: Building[];
   selectedBuildingId: string;
   onSelectBuilding: (buildingId: string) => void;
@@ -41,7 +41,6 @@ export const Header: React.FC<HeaderProps> = ({
   session,
   onLogout,
   activeAlertsCount,
-  openAnomalyModal,
   buildings,
   selectedBuildingId,
   onSelectBuilding,
@@ -136,6 +135,11 @@ export const Header: React.FC<HeaderProps> = ({
           Actuators
         </button>
         {isAdmin && (
+          <button id="nav-firewall" className={`nav-pill ${currentTab === 'firewall' ? 'active' : ''}`} onClick={() => setCurrentTab('firewall')}>
+            <Database size={15} /> Firewall DB
+          </button>
+        )}
+        {isAdmin && (
           <button id="nav-buildings" className={`nav-pill ${currentTab === 'settings' ? 'active' : ''}`} onClick={() => setCurrentTab('settings')}>
             <Settings size={15} /> Buildings
           </button>
@@ -163,9 +167,10 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Anomaly Test Trigger (Visible for Admin and Owner) */}
         {(isAdmin || isOwner) && (
-          <button
+          <a
             id="btn-inject-anomaly"
             className="panel-btn"
+            href="/sensor-input/phone.html"
             style={{
               borderColor: 'rgba(236, 72, 153, 0.4)',
               color: '#f472b6',
@@ -173,11 +178,10 @@ export const Header: React.FC<HeaderProps> = ({
               alignItems: 'center',
               gap: 6,
             }}
-            onClick={openAnomalyModal}
           >
             <Sparkles size={13} />
-            Inject Anomaly
-          </button>
+            Sensor Input
+          </a>
         )}
 
         {/* ── Notification Bell ── */}
@@ -249,6 +253,8 @@ export const Header: React.FC<HeaderProps> = ({
                       <div className="notif-item-icon">
                         {n.type === 'resolved' ? (
                           <CheckCircle2 size={16} color="var(--accent-emerald)" />
+                        ) : n.type === 'sensor_update' ? (
+                          <Activity size={16} color="var(--accent-cyan)" />
                         ) : (
                           <AlertTriangle
                             size={16}

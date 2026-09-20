@@ -235,6 +235,24 @@ body {
   width: 100%;
 }
 
+/* Firewall database */
+.firewall-search, .firewall-filter { display: flex; align-items: center; gap: 7px; background: rgba(0,0,0,.24); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 7px 9px; color: var(--text-muted); }
+.firewall-search input, .firewall-filter select { border: 0; outline: 0; background: transparent; color: var(--text-primary); font: 12px var(--font-main); }
+.firewall-search input { width: 180px; }
+.firewall-filter select { cursor: pointer; }
+.firewall-filter option { background: var(--bg-surface-elevated); }
+.firewall-table-wrap { overflow-x: auto; }
+.firewall-table { width: 100%; min-width: 980px; border-collapse: collapse; font-size: 12px; }
+.firewall-table th { color: var(--text-muted); font-family: var(--font-mono); font-size: 10px; letter-spacing: .04em; text-align: left; text-transform: uppercase; padding: 12px 10px; border-bottom: 1px solid var(--border-subtle); }
+.firewall-table td { color: var(--text-secondary); padding: 13px 10px; border-bottom: 1px solid rgba(255,255,255,.05); vertical-align: top; }
+.firewall-table tr:hover td { background: rgba(56,189,248,.035); }
+.firewall-record, .firewall-ip { color: var(--accent-cyan) !important; font-family: var(--font-mono); font-size: 11px; }
+.firewall-action { display: inline-block; padding: 3px 7px; border-radius: var(--radius-pill); font: 700 10px var(--font-mono); text-transform: uppercase; }
+.firewall-action.allowed { color: var(--accent-emerald); background: rgba(16,185,129,.12); }
+.firewall-action.blocked { color: var(--accent-rose); background: rgba(244,63,94,.13); }
+.firewall-action.monitored { color: var(--accent-amber); background: rgba(245,158,11,.12); }
+.firewall-empty { padding: 36px; color: var(--text-muted); text-align: center; }
+
 /* Alert Banner */
 .alert-banner {
   background: linear-gradient(90deg, rgba(245, 158, 11, 0.15), rgba(244, 63, 94, 0.15));
@@ -957,5 +975,32 @@ input:checked + .toggle-slider:before {
   background: var(--accent-emerald);
   animation: live-dot-pulse 1.5s ease-in-out infinite;
   flex-shrink: 0;
+}
+
+/* ── Real-time Floating Alert Toast ── */
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.live-toast {
+  animation: toast-slide-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s ease;
+}
+
+.live-toast.new_alert {
+  border-left: 4px solid var(--accent-rose) !important;
+  box-shadow: 0 8px 32px rgba(244, 63, 94, 0.25), var(--shadow-elevated) !important;
+}
+
+.live-toast.resolved {
+  border-left: 4px solid var(--accent-emerald) !important;
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.25), var(--shadow-elevated) !important;
 }
 

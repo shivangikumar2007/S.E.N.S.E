@@ -215,6 +215,52 @@ export const ANOMALY_PRESETS: AnomalyPreset[] = [
   },
 ];
 
+// Returns nominal baseline telemetry values for each floor
+export function getZoneBaseline(floor: number): Partial<FloorZone> {
+  switch (floor) {
+    case 1:
+      return { powerDrawKW: 18.2, waterFlowLpm: 6.4, airQualityScore: 92, temperatureC: 22.4, targetTempC: 22.0, hvacStatus: 'active', valveStatus: 'open', breakerStatus: 'on' };
+    case 2:
+      return { powerDrawKW: 14.8, waterFlowLpm: 5.1, airQualityScore: 89, temperatureC: 23.1, targetTempC: 22.5, hvacStatus: 'eco', valveStatus: 'open', breakerStatus: 'on' };
+    case 3:
+      return { powerDrawKW: 16.5, waterFlowLpm: 5.8, airQualityScore: 90, temperatureC: 22.5, targetTempC: 22.5, hvacStatus: 'active', valveStatus: 'open', breakerStatus: 'on' };
+    case 4:
+    default:
+      return { powerDrawKW: 11.2, waterFlowLpm: 3.8, airQualityScore: 95, temperatureC: 21.9, targetTempC: 21.5, hvacStatus: 'eco', valveStatus: 'open', breakerStatus: 'on' };
+  }
+}
+
+// Restores healthy telemetry baselines when an anomaly is resolved or mitigated
+export function restoreZoneBaseline(zone: FloorZone, category?: 'water' | 'energy' | 'air' | 'occupancy'): FloorZone {
+  const base = getZoneBaseline(zone.floor);
+  const updated = { ...zone, alertCount: Math.max(0, zone.alertCount - 1) };
+  if (!category) {
+    return {
+      ...zone,
+      powerDrawKW: base.powerDrawKW ?? zone.powerDrawKW,
+      waterFlowLpm: base.waterFlowLpm ?? zone.waterFlowLpm,
+      airQualityScore: base.airQualityScore ?? zone.airQualityScore,
+      temperatureC: base.temperatureC ?? zone.temperatureC,
+      valveStatus: 'open',
+      breakerStatus: 'on',
+      alertCount: 0,
+    };
+  }
+
+  if (category === 'water') {
+    updated.waterFlowLpm = base.waterFlowLpm ?? 5.0;
+    updated.valveStatus = 'open';
+  } else if (category === 'energy') {
+    updated.powerDrawKW = base.powerDrawKW ?? 14.0;
+    updated.temperatureC = base.temperatureC ?? 22.5;
+    updated.breakerStatus = 'on';
+  } else if (category === 'air') {
+    updated.airQualityScore = base.airQualityScore ?? 92;
+    updated.temperatureC = base.temperatureC ?? 22.5;
+  }
+  return updated;
+}
+
 // Generate 24 data points representing the last 24 hours of building consumption
 export function generate24HourHistory(currentPowerKW: number = 60.7, currentWaterLpm: number = 43.7): Array<{
   hour: string;

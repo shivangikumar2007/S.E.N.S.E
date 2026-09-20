@@ -199,10 +199,10 @@ export const AlertsCenter: React.FC<AlertsCenterProps> = ({
                             textTransform: 'uppercase',
                           }}
                         >
-                          {alert.resolved ? 'Resolved' : alert.severity}
+                          {alert.resolved ? (isUser ? 'Fixed' : 'Resolved') : alert.severity}
                         </span>
                         {/* LIVE sync badge — visible to users when alert is resolved */}
-                        {alert.resolved && (
+                        {isUser && alert.resolved && (
                           <span className="live-resolved-badge">
                             <span className="live-dot" />
                             LIVE · Fixed by Owner
@@ -264,16 +264,16 @@ export const AlertsCenter: React.FC<AlertsCenterProps> = ({
                         Simulate in Twin
                       </button>
                     )}
-                    {/* Mark Resolved — owner/admin only */}
+                    {/* Mark Resolved / Fix Anomaly — owner/admin only */}
                     {canResolve && !alert.resolved && (
                       <button
                         id={`btn-resolve-${alert.id}`}
                         className="btn-secondary"
-                        style={{ fontSize: 12, padding: '7px 12px' }}
+                        style={{ fontSize: 12, padding: '7px 12px', display: 'flex', alignItems: 'center', gap: 6 }}
                         onClick={() => onResolveAlert(alert.id)}
                       >
-                        <CheckCircle2 size={13} />
-                        Mark Resolved
+                        <CheckCircle2 size={13} color="var(--accent-emerald)" />
+                        Fix Anomaly
                       </button>
                     )}
                     {/* User view — read-only notice for unresolved alerts */}

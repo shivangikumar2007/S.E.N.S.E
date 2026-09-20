@@ -16,7 +16,9 @@ app.use(express.json());
 applyFirewall(app);
 
 // Serve static frontend assets
-app.use(express.static(path.join(__dirname, 'middleware', 'controllers', 'public')));
+app.get('/phone.html', (req, res) => res.redirect('/sensor-input/phone.html'));
+app.use('/sensor-input', express.static(path.join(__dirname, 'middleware', 'controllers', 'public')));
+app.use(express.static(path.join(__dirname, '..', 'sense', 'dist')));
 
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
@@ -32,6 +34,8 @@ wss.on('connection', (ws) => {
     type: 'THRESHOLDS_UPDATED',
     thresholds: sensorController.thresholds || { power: 300, water: 10, air: 100 }
   }));
+
+  sensorController.sendLatestReading(ws);
 
   ws.on('close', () => {
     connectedClients = connectedClients.filter(client => client !== ws);
@@ -66,6 +70,7 @@ app.post('/api/login', (req, res) => {
 // Threshold Management
 app.get('/api/thresholds', sensorController.getThresholds);
 app.post('/api/thresholds', sensorController.updateThresholds);
+app.get('/api/latest-reading', sensorController.getLatestReading);
 
 // Phone Sensor Data Route
 app.post('/api/sensor-data', sensorController.processSensorData);

@@ -1,6 +1,6 @@
 export type UserRole = 'administrator' | 'owner' | 'user';
 
-export type TabView = 'dashboard' | 'digital_twin' | 'analytics' | 'alerts' | 'controls' | 'settings';
+export type TabView = 'dashboard' | 'digital_twin' | 'analytics' | 'alerts' | 'controls' | 'settings' | 'firewall';
 
 export interface UserSession {
   email: string;
@@ -50,7 +50,8 @@ export interface AnomalyAlert {
 
 export interface AppNotification {
   id: string;
-  type: 'new_alert' | 'resolved';
+  type: 'new_alert' | 'resolved' | 'sensor_update';
+  audience: 'user';
   title: string;
   message: string;
   severity?: 'critical' | 'warning' | 'info';
@@ -85,6 +86,7 @@ export interface WhatIfScenario {
   solarBatteryContributionKW: number; // 0 - 500 kW BESS
   peakTariffMode: boolean;
   livePlatformSync: boolean;          // Instant two-way interaction with main platform
+  airQualityControlPct: number;       // 0 - 100% Fresh Air Ventilation & Economizer Flush
 }
 
 export interface SimulationResult {

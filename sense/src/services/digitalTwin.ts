@@ -54,18 +54,30 @@ export function runWhatIfSimulation(
   if (scenario.waterValveThrottlePct > 60) {
     comfortScore -= (scenario.waterValveThrottlePct - 60) * 0.75;
   }
+
+  // Air Quality & Ventilation impact on comfort
+  const airQualityPct = Math.max(0, Math.min(100, scenario.airQualityControlPct ?? 30));
+  if (airQualityPct < 20) {
+    comfortScore -= 8; // Inadequate fresh air intake / drowsiness penalty
+  } else if (airQualityPct >= 50) {
+    comfortScore += 5; // Clean air / ASHRAE 62.1 comfort bonus
+  }
   comfortScore = Math.max(5, Math.min(100, Math.round(comfortScore)));
 
   // 6. Feasibility validation
   const feasible = comfortScore >= 30 && targetTempC <= 42;
 
-  let recommendation = 'Optimal balance between resource conservation and tenant satisfaction.';
+  let recommendation = 'Optimal balance between resource conservation, air quality, and tenant satisfaction.';
   if (targetTempC > 38) {
     recommendation = 'Critical Warning: 50°C thermal setpoint induces extreme heat stress. Suitable only for industrial kiln or bake-out mode.';
   } else if (scenario.waterValveThrottlePct === 100) {
     recommendation = 'Emergency Water Isolation: 100% solenoid shutoff engaged. Complete leak containment achieved.';
+  } else if (airQualityPct === 100) {
+    recommendation = 'Emergency IAQ Flush: 100% fresh air economizer purge active, CO2 hazard flushed to safe levels.';
   } else if (scenario.solarBatteryContributionKW >= 250) {
     recommendation = 'Grid-Independence: High-capacity BESS injecting massive clean power, achieving near-zero utility reliance.';
+  } else if (airQualityPct >= 70) {
+    recommendation = 'Enhanced Ventilation: High economizer flush engaged, delivering rapid contaminant extraction and ASHRAE 62.1 compliance.';
   } else if (comfortScore < 60) {
     recommendation = 'Warning: Predicted indoor temperature deviates significantly from ASHRAE 55 standard.';
   } else if (projectedCostSavingsPct > 35) {

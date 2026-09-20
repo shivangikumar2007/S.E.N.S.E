@@ -12,6 +12,7 @@ describe('digitalTwin simulation', () => {
       solarBatteryContributionKW: 10,
       peakTariffMode: true,
       livePlatformSync: true,
+      airQualityControlPct: 30,
     };
 
     const result = runWhatIfSimulation(scenario, INITIAL_ZONES);
@@ -31,6 +32,7 @@ describe('digitalTwin simulation', () => {
       solarBatteryContributionKW: 0,
       peakTariffMode: false,
       livePlatformSync: false,
+      airQualityControlPct: 30,
     };
     const staleDeltaScenario: WhatIfScenario = {
       ...baseline,
@@ -50,6 +52,7 @@ describe('digitalTwin simulation', () => {
       solarBatteryContributionKW: 0,
       peakTariffMode: false,
       livePlatformSync: true,
+      airQualityControlPct: 30,
     };
 
     const result = runWhatIfSimulation(scenario, INITIAL_ZONES);
@@ -65,6 +68,7 @@ describe('digitalTwin simulation', () => {
       solarBatteryContributionKW: 500, // 500 kW BESS
       peakTariffMode: true,
       livePlatformSync: true,
+      airQualityControlPct: 30,
     };
 
     const result = runWhatIfSimulation(scenario, INITIAL_ZONES);
@@ -80,10 +84,48 @@ describe('digitalTwin simulation', () => {
       solarBatteryContributionKW: 0,
       peakTariffMode: false,
       livePlatformSync: false,
+      airQualityControlPct: 30,
     };
 
     const result = runWhatIfSimulation(highTempScenario, INITIAL_ZONES);
     expect(result.feasible).toBe(false);
     expect(result.recommendation).toContain('50°C');
+  });
+
+  it('should support 0-100% air quality ventilation and trigger IAQ flush mode', () => {
+    const flushScenario: WhatIfScenario = {
+      targetTempC: 22.0,
+      tempSetpointDelta: 0,
+      waterValveThrottlePct: 0,
+      solarBatteryContributionKW: 0,
+      peakTariffMode: false,
+      livePlatformSync: true,
+      airQualityControlPct: 100, // 100% Emergency IAQ Economizer Purge
+    };
+
+    const result = runWhatIfSimulation(flushScenario, INITIAL_ZONES);
+    expect(result.comfortImpactScore).toBeGreaterThanOrEqual(50);
+    expect(result.recommendation).toContain('Emergency IAQ Flush');
+  });
+
+  it('should penalize comfort when air quality ventilation is below minimum threshold', () => {
+    const poorVentScenario: WhatIfScenario = {
+      targetTempC: 22.0,
+      tempSetpointDelta: 0,
+      waterValveThrottlePct: 0,
+      solarBatteryContributionKW: 0,
+      peakTariffMode: false,
+      livePlatformSync: false,
+      airQualityControlPct: 10, // Inadequate fresh air
+    };
+
+    const standardVentScenario: WhatIfScenario = {
+      ...poorVentScenario,
+      airQualityControlPct: 50, // Standard healthy ventilation
+    };
+
+    const poorResult = runWhatIfSimulation(poorVentScenario, INITIAL_ZONES);
+    const standardResult = runWhatIfSimulation(standardVentScenario, INITIAL_ZONES);
+    expect(poorResult.comfortImpactScore).toBeLessThan(standardResult.comfortImpactScore);
   });
 });

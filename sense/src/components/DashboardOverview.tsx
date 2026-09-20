@@ -13,6 +13,9 @@ import {
   CheckCircle2,
   Maximize2,
   Sun,
+  Bell,
+  ShieldCheck,
+  Eye,
 } from 'lucide-react';
 
 interface DashboardOverviewProps {
@@ -56,9 +59,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const energyToday = buildingMetrics.energyTodayKWh;
   const waterUsageToday = buildingMetrics.waterUsageTodayKL;
   const healthScore = buildingMetrics.healthScore;
-  const activeAlerts = isUser ? alerts.filter((a) => a.floor === 4 && !a.resolved) : alerts.filter((a) => !a.resolved);
+
+  // Both user and owner/admin view all alerts for the building in real time
+  const activeAlerts = alerts.filter((a) => !a.resolved);
+  const resolvedAlerts = alerts.filter((a) => a.resolved);
 
   const primaryAlert = activeAlerts[0];
+  const recentResolvedAlert = resolvedAlerts[0];
 
   const handleSimulateInTwin = (floor: number) => {
     setSelectedFloorForTwin(floor);
@@ -159,7 +166,27 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </div>
             </div>
           </div>
-          {!isUser && (
+          {isUser ? (
+            <span
+              style={{
+                fontSize: 11,
+                fontFamily: 'var(--font-mono)',
+                color: 'var(--accent-amber)',
+                background: 'rgba(245, 158, 11, 0.15)',
+                padding: '6px 14px',
+                borderRadius: 'var(--radius-pill)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                border: '1px solid rgba(245, 158, 11, 0.3)',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+              }}
+            >
+              <Eye size={13} />
+              Owner Notified · Mitigation Active
+            </span>
+          ) : (
             <button
               id="btn-simulate-fix"
               className="alert-action-btn"
@@ -169,6 +196,36 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <ArrowRight size={14} />
             </button>
           )}
+        </div>
+      )}
+
+      {/* Resolved Anomaly Notice (Shows when anomaly was fixed by owner) */}
+      {!primaryAlert && recentResolvedAlert && (
+        <div
+          className="alert-banner"
+          role="status"
+          style={{
+            background: 'rgba(16, 185, 129, 0.1)',
+            borderColor: 'rgba(16, 185, 129, 0.35)',
+          }}
+        >
+          <div className="alert-banner-content">
+            <div className="alert-icon-wrap" style={{ color: 'var(--accent-emerald)', background: 'rgba(16, 185, 129, 0.18)' }}>
+              <CheckCircle2 size={20} />
+            </div>
+            <div>
+              <div className="alert-title" style={{ color: 'var(--accent-emerald)' }}>
+                ✓ Anomaly Fixed by Owner — {recentResolvedAlert.title}
+              </div>
+              <div className="alert-desc">
+                {recentResolvedAlert.location} · {recentResolvedAlert.potentialSavings} · All systems restored to healthy baseline.
+              </div>
+            </div>
+          </div>
+          <span className="live-resolved-badge">
+            <span className="live-dot" />
+            LIVE · FIXED & VERIFIED
+          </span>
         </div>
       )}
 
@@ -485,6 +542,135 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Live Building Incident & Alerts Activity Log (Visible to both User & Owner) */}
+      <div className="dashboard-panel" style={{ marginTop: 20 }}>
+        <div className="panel-header">
+          <div className="panel-title">
+            <Bell size={18} color="var(--accent-cyan)" />
+            Live Building Incident & Alerts Monitor
+          </div>
+          <button
+            id="btn-view-all-alerts"
+            className="panel-btn"
+            onClick={() => setCurrentTab('alerts')}
+            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            <span>Open Incident Center ({alerts.length})</span>
+            <ArrowRight size={13} />
+          </button>
+        </div>
+
+        {alerts.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '24px 16px', color: 'var(--text-muted)' }}>
+            <ShieldCheck size={36} color="var(--accent-emerald)" style={{ margin: '0 auto 8px auto' }} />
+            <div style={{ fontSize: 14, color: '#fff', fontWeight: 600 }}>All Systems Operating at Nominal Baseline</div>
+            <div style={{ fontSize: 12, marginTop: 4 }}>No anomalies or incidents detected.</div>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {alerts.slice(0, 4).map((a) => {
+              const isCrit = a.severity === 'critical';
+              return (
+                <div
+                  key={a.id}
+                  className="floor-slice"
+                  style={{
+                    padding: '12px 16px',
+                    borderColor: a.resolved
+                      ? 'rgba(255,255,255,0.06)'
+                      : isCrit
+                      ? 'rgba(244, 63, 94, 0.35)'
+                      : 'rgba(245, 158, 11, 0.35)',
+                    background: a.resolved ? 'rgba(0,0,0,0.2)' : undefined,
+                  }}
+                  onClick={() => {
+                    if (!isUser) handleSimulateInTwin(a.floor);
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div
+                      style={{
+                        padding: 8,
+                        borderRadius: 'var(--radius-sm)',
+                        background: a.resolved
+                          ? 'rgba(16, 185, 129, 0.12)'
+                          : isCrit
+                          ? 'rgba(244, 63, 94, 0.15)'
+                          : 'rgba(245, 158, 11, 0.15)',
+                        color: a.resolved
+                          ? 'var(--accent-emerald)'
+                          : isCrit
+                          ? 'var(--accent-rose)'
+                          : 'var(--accent-amber)',
+                      }}
+                    >
+                      {a.resolved ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
+                    </div>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontWeight: 600, fontSize: 13, color: '#fff' }}>{a.title}</span>
+                        <span
+                          style={{
+                            fontSize: 9,
+                            fontFamily: 'var(--font-mono)',
+                            padding: '1px 6px',
+                            borderRadius: 'var(--radius-pill)',
+                            background: a.resolved
+                              ? 'rgba(16, 185, 129, 0.2)'
+                              : isCrit
+                              ? 'rgba(244, 63, 94, 0.2)'
+                              : 'rgba(245, 158, 11, 0.2)',
+                            color: a.resolved
+                              ? 'var(--accent-emerald)'
+                              : isCrit
+                              ? 'var(--accent-rose)'
+                              : 'var(--accent-amber)',
+                            fontWeight: 700,
+                            textTransform: 'uppercase',
+                          }}
+                        >
+                          {a.resolved ? 'Fixed' : a.severity} · Floor {a.floor}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 2 }}>
+                        {a.description} — <strong style={{ color: '#fff' }}>{a.location}</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ textAlign: 'right', minWidth: 150 }}>
+                    {a.resolved ? (
+                      <span className="live-resolved-badge">
+                        <span className="live-dot" />
+                        Fixed by Owner
+                      </span>
+                    ) : (
+                      <span
+                        style={{
+                          fontSize: 10,
+                          fontFamily: 'var(--font-mono)',
+                          color: 'var(--accent-amber)',
+                          background: 'rgba(245, 158, 11, 0.12)',
+                          padding: '3px 8px',
+                          borderRadius: 'var(--radius-pill)',
+                          border: '1px solid rgba(245, 158, 11, 0.25)',
+                          fontWeight: 700,
+                        }}
+                      >
+                        {isUser ? 'Awaiting Owner' : 'Action Required'}
+                      </span>
+                    )}
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>
+                      {a.timestamp}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

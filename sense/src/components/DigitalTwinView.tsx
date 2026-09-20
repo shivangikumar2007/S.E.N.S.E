@@ -14,6 +14,7 @@ import {
   ShieldCheck,
   RotateCcw,
   Radio,
+  Wind,
 } from 'lucide-react';
 
 interface DigitalTwinViewProps {
@@ -45,6 +46,7 @@ export const DigitalTwinView: React.FC<DigitalTwinViewProps> = ({
     waterValveThrottlePct: selectedFloor === 3 ? 40 : 0,
     solarBatteryContributionKW: 45,
     peakTariffMode: true,
+    airQualityControlPct: 30, // 0 - 100% Fresh Air IAQ Flush
     livePlatformSync: true, // Interacts with main platform in real-time
   });
 
@@ -105,6 +107,7 @@ export const DigitalTwinView: React.FC<DigitalTwinViewProps> = ({
       waterValveThrottlePct: 0,
       solarBatteryContributionKW: 0,
       peakTariffMode: false,
+      airQualityControlPct: 30,
       livePlatformSync: true,
     });
   };
@@ -318,6 +321,10 @@ export const DigitalTwinView: React.FC<DigitalTwinViewProps> = ({
                       <Droplets size={13} color={hasAlert ? 'var(--accent-rose)' : 'var(--accent-blue)'} />
                       {zone.waterFlowLpm} L/m
                     </span>
+                    <span className="floor-metric-tag" title="Air Quality Score">
+                      <Wind size={13} color={zone.airQualityScore >= 80 ? 'var(--accent-emerald)' : 'var(--accent-amber)'} />
+                      {zone.airQualityScore} AQI
+                    </span>
                   </div>
                 </div>
               );
@@ -337,7 +344,7 @@ export const DigitalTwinView: React.FC<DigitalTwinViewProps> = ({
             <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', color: 'var(--accent-cyan)', marginBottom: 8 }}>
               Selected Zone Telemetry: {activeZone.name}
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, fontSize: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, fontSize: 11 }}>
               <div>
                 <span style={{ color: 'var(--text-muted)' }}>HVAC Setpoint:</span>{' '}
                 <strong style={{ color: '#fff' }}>{activeZone.targetTempC}°C</strong>
@@ -352,6 +359,12 @@ export const DigitalTwinView: React.FC<DigitalTwinViewProps> = ({
                 <span style={{ color: 'var(--text-muted)' }}>Breaker:</span>{' '}
                 <strong style={{ color: activeZone.breakerStatus === 'on' ? 'var(--accent-cyan)' : 'var(--accent-rose)' }}>
                   {activeZone.breakerStatus.toUpperCase()}
+                </strong>
+              </div>
+              <div>
+                <span style={{ color: 'var(--text-muted)' }}>Air Quality:</span>{' '}
+                <strong style={{ color: activeZone.airQualityScore >= 80 ? 'var(--accent-emerald)' : 'var(--accent-amber)' }}>
+                  {activeZone.airQualityScore} AQI {activeZone.airQualityScore < 70 ? '(FLUSH REQ)' : '(HEALTHY)'}
                 </strong>
               </div>
             </div>
@@ -479,7 +492,40 @@ export const DigitalTwinView: React.FC<DigitalTwinViewProps> = ({
             </div>
           </div>
 
-          {/* Control 4: Peak Tariff Mode */}
+          {/* Control 4: Air Quality Control (0% to 100% Fresh Air Economizer Flush) */}
+          <div className="sandbox-control-group">
+            <div className="sandbox-control-header">
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Wind size={15} color="var(--accent-emerald)" />
+                Air Quality & Fresh Air Ventilation (Floor {selectedFloor})
+              </span>
+              <strong style={{ fontFamily: 'var(--font-mono)', color: scenario.airQualityControlPct >= 80 ? 'var(--accent-cyan)' : 'var(--accent-emerald)', fontSize: 14 }}>
+                {scenario.airQualityControlPct}% {scenario.airQualityControlPct === 100 ? '(PURGE FLUSH)' : scenario.airQualityControlPct >= 60 ? '(HIGH FLUSH)' : scenario.airQualityControlPct >= 30 ? '(ASHRAE STANDARD)' : '(MIN RECIRC)'}
+              </strong>
+            </div>
+            <input
+              id="slider-air-quality-control"
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={scenario.airQualityControlPct}
+              disabled={isReadOnly}
+              onChange={(e) => setScenario({ ...scenario, airQualityControlPct: parseInt(e.target.value, 10) })}
+              className="slider-input"
+              style={{
+                accentColor: scenario.airQualityControlPct >= 80 ? 'var(--accent-cyan)' : 'var(--accent-emerald)',
+              }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>
+              <span>0% (Min Recirc)</span>
+              <span>30% (Baseline IAQ)</span>
+              <span>70% (High Extraction)</span>
+              <span style={{ color: 'var(--accent-emerald)', fontWeight: 600 }}>100% (Purge Flush)</span>
+            </div>
+          </div>
+
+          {/* Control 5: Peak Tariff Mode */}
           <div
             style={{
               display: 'flex',
