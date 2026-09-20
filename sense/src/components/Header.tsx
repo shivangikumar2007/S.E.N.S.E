@@ -300,10 +300,10 @@ export const Header: React.FC<HeaderProps> = ({
               height: 28,
               borderRadius: '50%',
               background: isAdmin
-                ? 'linear-gradient(135deg, #0284c7, #8b5cf6)'
+                ? 'linear-gradient(135deg, #9a714b, #d7b27b)'
                 : isOwner
-                ? 'linear-gradient(135deg, #10b981, #0284c7)'
-                : 'linear-gradient(135deg, #64748b, #334155)',
+                ? 'linear-gradient(135deg, #a7b27d, #9a714b)'
+                : 'linear-gradient(135deg, #8e7963, #5c4a3b)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

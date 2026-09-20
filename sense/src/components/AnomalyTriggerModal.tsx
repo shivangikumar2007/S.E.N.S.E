@@ -73,7 +73,7 @@ export const AnomalyTriggerModal: React.FC<AnomalyTriggerModalProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div
               style={{
-                background: 'linear-gradient(135deg, #ec4899, #8b5cf6)',
+                background: 'linear-gradient(135deg, #b47a62, #8b6545)',
                 color: '#fff',
                 padding: 7,
                 borderRadius: 'var(--radius-sm)',
@@ -210,10 +210,10 @@ export const AnomalyTriggerModal: React.FC<AnomalyTriggerModalProps> = ({
                     fontSize: 12,
                   }}
                 >
-                  <option value={1} style={{ background: '#0e1524' }}>Floor 1 (Commercial)</option>
-                  <option value={2} style={{ background: '#0e1524' }}>Floor 2 (Residential)</option>
-                  <option value={3} style={{ background: '#0e1524' }}>Floor 3 (Residential)</option>
-                  <option value={4} style={{ background: '#0e1524' }}>Floor 4 (Penthouse)</option>
+                  <option value={1} style={{ background: '#2d241d' }}>Floor 1 (Commercial)</option>
+                  <option value={2} style={{ background: '#2d241d' }}>Floor 2 (Residential)</option>
+                  <option value={3} style={{ background: '#2d241d' }}>Floor 3 (Residential)</option>
+                  <option value={4} style={{ background: '#2d241d' }}>Floor 4 (Penthouse)</option>
                 </select>
               </div>
 
